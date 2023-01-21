@@ -16,6 +16,8 @@ bot.
 """
 
 import logging
+import pickle
+import random
 
 from telegram import __version__ as TG_VER
 
@@ -38,6 +40,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+aneki = pickle.load(open("data/aneki.pkl", "rb"))
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -61,6 +64,11 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(update.message.text)
 
 
+async def random_anek(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    rnd_anek_idx = random.randint(0, len(aneki))
+    await update.message.reply_text(aneki[rnd_anek_idx])
+
+
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
@@ -71,9 +79,11 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("random", random_anek))
 
     # on non command i.e message - echo the message on Telegram
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    application.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND, echo))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
